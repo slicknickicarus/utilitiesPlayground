@@ -42,7 +42,7 @@
     <ItemGroup>
         <Compile Include="Conditions.cs" />
         <Compile Include="EventTypes.cs" />
-        <Compile Include="MonoBehaviour1.cs" />
+        <Compile Include="EventManager.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

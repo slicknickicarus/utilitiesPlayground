@@ -4,18 +4,15 @@ using System.Linq;
 using Conditions;
 using UnityEngine;
 
-public class EventManager : MonoBehaviour
+public static class EventManager
 {
-    public static EventManager Instance;
+    private static Dictionary<Func<bool>, Action> ConditionalEvents = new Dictionary<Func<bool>, Action>();
+    private static Dictionary<Func<bool>, Action<object>> ConditionalEventsData = new Dictionary<Func<bool>, Action<object>>();
+    private static Dictionary<Enum, Action> EmittedEvents = new Dictionary<Enum, Action>();
+    private static Dictionary<Enum, Action<object>> EmittedEventsData = new Dictionary<Enum, Action<object>>();
 
-    private Dictionary<Func<bool>, Action> ConditionalEvents = new Dictionary<Func<bool>, Action>();
-    private Dictionary<Func<bool>, Action<object>> ConditionalEventsData = new Dictionary<Func<bool>, Action<object>>();
-    private Dictionary<Enum, Action> EmittedEvents = new Dictionary<Enum, Action>();
-    private Dictionary<Enum, Action<object>> EmittedEventsData = new Dictionary<Enum, Action<object>>();
-
-    private void Awake()
+    static EventManager()
     {
-        Instance = this;
         var eventTypeList = GetAllEnumTypeList(nameof(EventTypes));
         
         foreach (var eventType in eventTypeList)
@@ -29,17 +26,12 @@ public class EventManager : MonoBehaviour
             ConditionalEvents.Add(condition, () => {});
         }
     }
-    private void Update()
-    {
-        CheckConditionDictionary();
-    }
-    
     /// <summary>
     /// Invoke subscribers of the emitted event type.
     /// </summary>
     /// <param name="eventType">Enum type defined in the EventType namespace.</param>
     /// <param name="data">Data to be invoked as a parameter, defaults to null.</param>
-    public void EmitEvent(Enum eventType, object data = null)
+    public static void EmitEvent(Enum eventType, object data = null)
     {
         EmittedEvents[eventType].Invoke();
         if (data != null)
@@ -52,19 +44,19 @@ public class EventManager : MonoBehaviour
     /// </summary>
     /// <param name="eventType">Enum defined in the EventTypes namespace.</param>
     /// <param name="subscriber">The Action to be invoked.</param>
-    public void Subscribe(Enum eventType, Action subscriber) => EmittedEvents[eventType] += subscriber;
+    public static void Subscribe(Enum eventType, Action subscriber) => EmittedEvents[eventType] += subscriber;
     /// <summary>
     /// Subscribe to an emitted event using an Action with a single parameter.
     /// </summary>
     /// <param name="eventType">Enum defined in the EventTypes namespace.</param>
     /// <param name="subscriber">The Action to be invoked. In the event you need more parameters, Tuples are suggested.</param>
-    public void Subscribe(Enum eventType, Action<object> subscriber) => EmittedEventsData[eventType] += subscriber;
+    public static void Subscribe(Enum eventType, Action<object> subscriber) => EmittedEventsData[eventType] += subscriber;
     /// <summary>
     /// Subscribe to conditional event using an Action.
     /// </summary>
     /// <param name="condition">Condition to be subscribed to.</param>
     /// <param name="subscriber">Action to subscribe with.</param>
-    public void Subscribe(Func<bool> condition, Action subscriber)
+    public static void Subscribe(Func<bool> condition, Action subscriber)
     {
         if (ConditionalEvents.ContainsKey(condition))
         {
@@ -81,7 +73,7 @@ public class EventManager : MonoBehaviour
     /// </summary>
     /// <param name="condition">The condition to be subscribed to.</param>
     /// <param name="subscriber">The Action to receive a parameter to do the subscribing.</param>
-    public void Subscribe(Func<bool> condition, Action<object> subscriber)
+    public static void Subscribe(Func<bool> condition, Action<object> subscriber)
     {
         if (ConditionalEventsData.ContainsKey(condition))
         {
@@ -98,7 +90,7 @@ public class EventManager : MonoBehaviour
     /// </summary>
     /// <param name="eventType">Enum defined in the EventTypes namespace.</param>
     /// <param name="unSub">The Action to be unsubscribed.</param>
-    public void UnSubscribe(Enum eventType, Action unSub)
+    public static void UnSubscribe(Enum eventType, Action unSub)
     {
         if (EmittedEvents.ContainsKey(eventType))
         {
@@ -110,7 +102,7 @@ public class EventManager : MonoBehaviour
     /// </summary>
     /// <param name="eventType"></param>
     /// <param name="unsub">The Action to be unsubscribed. Be sure the signature matches that used in the Subscribe method.</param>
-    public void UnSubScribe(Enum eventType, Action<object> unsub)
+    public static void UnSubScribe(Enum eventType, Action<object> unsub)
     {
         if (EmittedEventsData.ContainsKey(eventType))
         {
@@ -120,7 +112,7 @@ public class EventManager : MonoBehaviour
     /// <summary>
     /// An action triggered to evaluate any conditional events created in the ConditionDictionary.
     /// </summary>
-    private void CheckConditionDictionary()
+    private static void CheckConditionDictionary()
         {
             foreach (var condition in ConditionalEvents.Keys.Where(condition => condition.Invoke()))
             {

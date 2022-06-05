@@ -4,12 +4,13 @@ namespace Conditions
 {
     public static class Conditional
     {
-        private static bool example1 = true;
-        private static bool example2 = true;
-        public static Func<bool>[] ArrayAll = 
+        private const bool Example1 = true;
+        private const bool Example2 = true;
+
+        public static readonly Func<bool>[] ArrayAll = 
         {
-            () => example1 == example2,
-            () => example2 == example1
+            () => Example1 == Example2,
+            () => Example2 == Example1
         };
     }
     
